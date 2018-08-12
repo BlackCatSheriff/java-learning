@@ -285,7 +285,7 @@
 
 2. 非 static 内部类隐式保存了外部类的引用
 
-3. 内部类拥有外围类的所有元素访问权
+3. **内部类拥有外围类的所有元素访问权**
 
 4. 迭代器模式
 
@@ -464,9 +464,185 @@
 ## 10.7 嵌套类
 
 1. 嵌套类就是 static 内部类
-2. 
 
+2. 可以使用嵌套类测试外围类，发布的时候只要删除 outerclass$innerclass 即可，传统的放在外围类里面的main函数影响外围类的字节码
 
+   ```java
+   public class TestBed{
+       public void foo(){};
+       public static class Tester{
+           public static void main(String[] args){
+               TestBed tb = new TestBed();
+               t.foo();
+           }
+       }
+   }
+   ```
+
+3. 回调函数：相当于传递给处理函数一个函数指针，当处理完事务的时候调用一下函数指针继续处理。在java种内使用类实现一个接口的方式使得这个类 this 当作函数指针
+
+   ```java
+   
+   interface CallBack{
+       void doit(String answer);
+   }
+   
+   class A implements  CallBack{
+   
+       public void foo(){
+           System.out.println("this is a ordinary function!");
+           new B().deal("1+1=？", this);
+       }
+   
+       //doit 是一个回调函数
+       public void doit(String answer) {
+           System.out.println("this is a callback function! & answer: "+answer);
+       }
+   }
+   
+   
+   class B{
+       public void deal(String question, CallBack callBack){
+           System.out.println("copy question!");
+           callBack.doit(question+"--->done");
+       }
+   }
+   
+   public class CallbackSample {
+       public static void main(String[] args) {
+          A a = new A();
+          a.foo();
+       }
+   }
+   //output
+   this is a ordinary function!
+   copy question!
+   this is a callback function! & answer: 1+1=？--->done
+   ```
+
+   也可使用内部类完成, 因为 内部类可以享用外围类的所有元素，因此完全可以替代一个外围类的函数
+
+   ```java
+   class A {
+   
+       public void foo(){
+           System.out.println("this is a ordinary function!");
+           new B().deal("1+1=？", getCallBackRef());
+       }
+   
+       private class Closure implements CallBack{
+           public void doit(String answer) {
+               System.out.println("this is a callback function! & answer: "+answer);
+           }
+       }
+   
+       public CallBack getCallBackRef(){return new Closure();}
+   
+   }
+   ```
+
+## 10.9 内部类继承
+
+1. 内部类的构造函数必须连接到指向其外围类对象的引用，单独继承内部类也不必须完成这步操作。
+
+2. 使用特殊的语法构建这个隐藏的外围类引用
+
+   ```java
+   class WithInner{
+       public class Inner{
+           private int a;
+           Inner(int a) {
+               this.a = a;
+           }
+       }
+   }
+   public class InheritInner extends WithInner.Inner {
+   
+       public InheritInner(int a, WithInner withInner) {
+           withInner.super(a);//这里必须这样写
+       }
+   }
+   
+   ```
+
+3. 继承包括内部类的外部类里面定义了同名称的内部类与父类中的内部类没有关系，因为属于不同的命名空间
+
+## 10.10 内部类标识符
+
+1. 普通内部类： Outer\$Inner.class
+2. 匿名类： Outer\$1.class   Outer\$2.class
+
+# 第十一章 持有对象
+
+1. 常用接口：
+
+   ```java
+   List<Integer> ll = Arrays.asList(1,2,3,4);  //底层是数组，不可以调用 ll.add/delete
+   Arrays.<T>asList();   				       //指明 T 作为list的明确类型
+   sublist(start,end);						  //取出片段
+   containsAll(list)                           //与查找列表内容的顺序无关
+   Collections.sort();                          //排序
+   COllections.shuffle();                      //打乱
+   retainAll();						  //交集
+   
+   
+   ```
+
+2. 迭代器：
+
+   - 通用迭代器: Iterator
+   - List 的加强迭代器： ListIterator 
+     - 可以双向移动，hasNext(), hasPrevious()
+     - 可以访问当前元素的前一个位置后一个位置的元素索引
+     - list.listIterator(n); 创建指向第n个的迭代器
+       - list.listIterator(); 创建指向list首部元素的迭代器
+       - list.listIterator(size()-1); 创建指向list尾部元素的迭代器
+
+## 11.7  LinkedList
+
+1. 底层是链表，适合插入删除，随机访问能力差
+
+2. 获取表头元素：
+
+   | Method     |       列表为空时       |
+   | :---------: | :--------------------: |
+   | getFirst() | NoSuchElementException |
+   | element()  | NoSuchElementException |
+   | peek()     |          null          |
+
+3. 删除表头元素:
+
+   |    Method     |       列表为空时       |
+   | :-----------: | :--------------------: |
+   | removeFirst() | NoSuchElementException |
+   |   remove()    | NoSuchElementException |
+   |    poll()     |          null          |
+
+4. 删除表尾元素： removeLast()
+
+5. 插入元素：
+
+   - 表头：addFirst()
+   - 表尾：
+     - add()
+     - addLast()
+
+## 11.8 Stack
+
+1. 使用 LinkedList 实现 Stack， 不适用继承方式实现是因为 Stack 不需要暴露 LikedList 的接口，Stack 只要暴露一部分即可。所以使用组合的方式实现。
+
+   ```java
+   public class Stack<T> {
+       private LinkedList<T> storage = new LinkedList<T>();
+       public void push(T v){ storage.addFirst(v);}
+       public T pop(){ return storage.poll();}
+       public T peek(){ return storage.peek();}
+       public boolean isEmpty(){return storage.isEmpty();}
+       public String toString(){return  storage.toString();}
+   }
+   ```
+
+   
 
 
 
