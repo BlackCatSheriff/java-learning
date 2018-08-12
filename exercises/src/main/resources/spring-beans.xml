@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--Start a spring-->
+    <!--<bean id="helloSpring" class="com.ouc.spring.foundation.HelloSpring"></bean>-->
+
+
+    <!--learning hook way Start -->
+    <!--this is a way of injection -->
+    <!--<bean id="injectionService" class="com.ouc.spring.foundation.hook.InjectionService">-->
+        <!--<property name="injectionDao" ref="injectionDao1"></property>-->
+    <!--</bean>-->
+
+    <!--this is a way of constructor-->
+    <!--<bean id="injectionService" class="com.ouc.spring.foundation.hook.InjectionService">-->
+        <!--<constructor-arg name="injectionDao" ref="injectionDao"></constructor-arg>-->
+    <!--</bean>-->
+
+    <!--<bean id="injectionDao1" class="com.ouc.spring.foundation.hook.InjectionDao"></bean>-->
+    <!--learning hook way End -->
+
+
+    <!--learning init and destroy Begin-->
+    <!--<bean id="initBeanByMethod" class="com.ouc.spring.foundation.initializaion.InitBeanByMethod" init-method="init" destroy-method="destroy"></bean>-->
+    <!--both all method and interface to init bean-->
+    <!--<bean id="initBeanByInterface" class="com.ouc.spring.foundation.initializaion.InitBeanByInterface" init-method="start" destroy-method="stop"></bean>-->
+    <!--learning init and destroy End-->
+
+    <!--learning aware Begin-->
+    <!--<bean id="moocBeanNameAware" class="com.ouc.spring.foundation.aware.MoocBeanNameAware"></bean>-->
+    <!--<bean id="moocApplicationAware" class="com.ouc.spring.foundation.aware.MoocApplicationAware"></bean>-->
+    <!--learning aware End-->
+
+
+</beans>
