@@ -579,11 +579,12 @@
    ```java
    List<Integer> ll = Arrays.asList(1,2,3,4);  //底层是数组，不可以调用 ll.add/delete
    Arrays.<T>asList();   				       //指明 T 作为list的明确类型
-   sublist(start,end);						  //取出片段
-   containsAll(list)                           //与查找列表内容的顺序无关
+   list.sublist(start,end);						  //取出片段
+   list.containsAll(list)                           //与查找列表内容的顺序无关
    Collections.sort();                          //排序
    COllections.shuffle();                      //打乱
-   retainAll();						  //交集
+   Collections.addAll();					//批量添加
+   list.retainAll();						  //交集
    
    
    ```
@@ -597,6 +598,12 @@
      - list.listIterator(n); 创建指向第n个的迭代器
        - list.listIterator(); 创建指向list首部元素的迭代器
        - list.listIterator(size()-1); 创建指向list尾部元素的迭代器
+
+   > 注：
+   >
+   > 迭代器长度为 0....size .因此0没有前驱，size没有后继。但是通常意义的数组最后一个元素（即 size-1 ）是有后继的，为size
+   >
+   > 
 
 ## 11.7  LinkedList
 
@@ -644,36 +651,168 @@
 
    
 
+## 11.9 Set
+
+1. 测试对象归属集合  `set.contains(o);`
+
+2. 字母序（像单词书一样，从 a 开头的开始罗列，然后在罗列 b 开头） 在构造函数添加比较器
+
+   `new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);`
+
+   降序比较器
+
+   `new PriorityQueue<String>(string.size(),Collections.reverse.Order());`
+
+## 11.10 Map
+
+1.  Map.entrySet() 获取键值对set, 类型为 Map.entry。
+2. 获取 key， entry.getKey()
+3. 获取 value ， entry.getValue()
+
+## 11.13 Foreach与迭代器
+
+1. 类实现  Iterable 接口中 的 iterator() 方法就可以使用 foreach ，默认实现一个迭代器方法
+
+2. 一个类也可以实现多个 iterable 接口，使用 foreach 语法中 for(Info i : collection) ,collection只要是 iterable 就可以
+
+   ```java
+   public class Stack<T> implements Iterable<T> {
+       private LinkedList<T> storage = new LinkedList<T>();
+       public void push(T v){ storage.addFirst(v);}
+       public T pop(){ return storage.poll();}
+       public T peek(){ return storage.peek();}
+       public boolean isEmpty(){return storage.isEmpty();}
+       public String toString(){return  storage.toString();}
+       public Iterator<T> iterator() {
+           return storage.iterator();
+       }
+   
+       public Iterable<T> reversed(){
+           return new Iterable<T>() {
+               public Iterator<T> iterator() {
+                   return new Iterator<T>() {
+                       private ListIterator<T> it  = storage.listIterator(storage.size());
+                       public boolean hasNext() {
+                           return it.hasPrevious();
+                       }
+   
+                       public T next() {
+                           return it.previous();
+                       }
+   
+                       public void remove() {
+                           it.remove();
+                       }
+                   };
+               }
+           };
+       }
+   }
+   ```
 
+   调用
 
+   ```java
+   System.out.println("=====类通过实现接口，调用方法===========");
+   for (Integer integer : stack) {
+       System.out.println(integer);
+   }
+   
+   System.out.println("=====通过实现返回 iterable 方法，重新定义个迭代器调用方法============");
+   
+   for (Integer integer : stack.reversed()) {
+       System.out.println(integer);
+   }
+   ```
 
+   
 
+# 第十二章 通过异常处理错误
 
+> 异常最关注的地方应该是异常的命名，必须要望文知意
 
+1. 处理异常有“终结模式”     “恢复模式”  ，一般使用 “终结模式”， "恢复模式"就是 套一层 while 不停执行 try 直到满足要求
 
+   ```java
+   public static void main(String[] args) {
+       Random random = new Random(1007);
+       int i=0;
+       while(true){
+           try{
+               if(random.nextInt(25)==13){
+   
+                   System.out.println("ok!! i="+i);
+                   break;
+               }
+               else
+                   throw new NullPointerException();
+           }catch (NullPointerException e){
+               System.out.println("i= "+(++i));
+   
+           }
+       }
+   }
+   ```
 
+2. 可以配合使用 java.util.logging 哦 
 
+3. 在编写抽象基类、接口时候可以在方法定义的时候 throw 一些异常，但是方法中名没有抛出异常，这种做法是占个位子，以后想抛出异常的时候，客户端不需要修改代码。
 
+4. catch 异常应该范围从小到大，Exception 作为常用异常的基类可以放在最外层。
 
+5. Throwable 常用接口:
 
+   - String getMessage()
 
+   - String getLocalizedMessage()
 
+   - String toString()   返回对异常的简单描述
 
+   - printStackTrace()     输出到 标准出错流  System.err
 
+   - printStackTrace(PrintStream)   输出到指定流
 
+   - printStackTrace(java.io.PrintWriter)   一般输出到字符串流中用于日志记录
 
+   - getClass().getName()    获取抛出异常的类型
 
+   - getStackTrace() 返回一个由栈轨迹中元素构成的数组，栈顶(index=0) 是调用序列的最后一个方法调用(抛出 throw 的语句)
 
+     ```java
+             try{
+                 throw new Exception("a error!");
+             }catch (Exception e){
+                 for (StackTraceElement ste : e.getStackTrace()){
+                     System.out.println(ste);
+                     //ste.getMethod();
+                 }
+             }
+         }
+     ```
 
+     
 
+6. 重新抛出异常：在catch 中 throw e ， 那么异常抛到上一级并且中止后面的catch语句。
 
+   - 重新抛出异常，如果直接在catch中 throw e， 那么上一级打印的栈信息将是原来的栈信息
+   - 重新抛出异常，如果在catch中 throw **e.fillInStackTrace()**， 那么上一级打印的栈信息将是更新后在新的地点抛出的栈信息。这种写法等价于重新 new 一个 异常对象抛出，所以不会对之前的信息有所保留
 
+7. 异常类对象的清理不需要关系，因为在处理之后对象失去引用指针将会被垃圾回收器回收
 
+8. 异常链：在新生成的异常对象中保留原异常信息。通过下面操作后然后再 throw
 
+   - 通过构造器传入的类： Error(java虚拟机报告系统错误)、Exception、RuntimeException
+   - 通过调用 initCause() 方法：除上面三类
 
+9. RuntimeError 不需要处理，但是可以抛出这类异常，事实上这属于编程错误。
 
+10. 异常的限制：派生类不能抛出比基类更为严格的异常
 
+   - 在继承或者实现接口的时候，覆盖的方法抛出一场列表必须只能是原来方法中的异常，当基类中方法与接口方法同名但是基类抛出异常和接口抛出异常不一致的时候，应该遵循基类抛出异常，或者不抛出任何异常。
+   - 构造器抛出异常不受限制，但是派生类构造器必须抛出基类构造器的异常
+   - 
 
+   
 
 
 
@@ -821,6 +960,40 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 易错点
+
+1. Arrays.asList()
+   -  `System.out.println(Arrays.asList(new Integer[]{1,2,3,4}).size());` 输出 4
+   - `System.out.println(Arrays.asList(new int[]{1,2,3,4}).size());` 输出1，被认为是一个**指向数组的指针**
+   - 基本类型和类类型不一样
 
 
 
@@ -833,3 +1006,6 @@
 1. 构造器是静态方法
 2. Java中除了 static 和 final（private 也是final） 方法是前期绑定，其他都是动态绑定
 3. final 方法相比没有final的可以提高一点性能，final方法由动态绑定变为静态绑定
+4. 异常不能作为重载条件也就是不能作为判别不同方法的依据，不用方法主要是依据方法名和方法的参数决定
+5. 
+

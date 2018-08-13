@@ -45,3 +45,5 @@ public class Sequence2 {
         deal(Service2Impl.factory);
     }
 }
+
+
