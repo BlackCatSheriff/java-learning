@@ -1,3 +1,7 @@
+[TOC]
+
+
+
 # 第五章 初始化与清理
 
 ## 5.5 清理：终结处理和垃圾回收
@@ -96,8 +100,8 @@
 
 ## 6.1 包
 
-1. .java 中只能有一个 public 类，如果有多个 class 那么这些 class 包外是看不到的，这些类一般是为了辅助 Public 类而生的
-2. .Java中的每个类都会输出 .class 文件
+1. java 中只能有一个 public 类，如果有多个 class 那么这些 class 包外是看不到的，这些类一般是为了辅助 Public 类而生的
+2. Java中的每个类都会输出 .class 文件
 
 ## 6.2 Java 访问权限修饰词
 
@@ -808,11 +812,162 @@
 
 10. 异常的限制：派生类不能抛出比基类更为严格的异常
 
-   - 在继承或者实现接口的时候，覆盖的方法抛出一场列表必须只能是原来方法中的异常，当基类中方法与接口方法同名但是基类抛出异常和接口抛出异常不一致的时候，应该遵循基类抛出异常，或者不抛出任何异常。
-   - 构造器抛出异常不受限制，但是派生类构造器必须抛出基类构造器的异常
-   - 
+  - 在继承或者实现接口的时候，覆盖的方法抛出一场列表必须只能是原来方法中的异常，当基类中方法与接口方法同名但是基类抛出异常和接口抛出异常不一致的时候，应该遵循基类抛出异常，或者不抛出任何异常。
+  - 构造器抛出异常不受限制，但是派生类构造器必须抛出基类构造器的异常
 
+# 第十三章 字符串
+
+1. 不可变String。String对象是只读的。下面例子说明在进行＋运算的时候，重新new了String 对象指向了a
+
+   ```java
+   public static void main(String[] args) {
+       String a="abc";
+       System.out.println(a.hashCode());
+       a+="12";
+       System.out.println(a.hashCode());
+   }
+   //output
+   96354
+   92597763
+   ```
+
+2. JVM在编译时候会将 String的加法优化为 StringBuilder.append() ，但是一般我们这么写 a+="ss" 并且放在循环里面，这时候就会出问题，编译器会每次创建一个 StringBuilder 然后调用 toString() ，然后赋值 a。不停的创建 StringBulider 对象。导致严重的内存浪费
+
+3. StringBuffer 是线程安全的，StringBuilder 不是
+
+4. 无意识的调用递归爆栈， 由于使用 + 相连，那么 this会默认调用toString()方法，所以形成了递归。
+
+   ```java
+   public String toString() {
+       return "addr:"+this;
+   }
+   ```
+
+   正确：
+
+   ```java
+   public String toString() {
+       return "addr:"+super.toString();
+   }
+   ```
+
+5. String 常用操作
+
+   | 方法                         | 参数                                                     | 应用                                                         |
+   | :--------------------------- | :------------------------------------------------------- | :----------------------------------------------------------- |
+   | 构造器                       | String、StringBuilder、StringBuffer、char 数组、byte数组 | 创建String对象                                               |
+   | length()                     |                                                          | String中字符个数                                             |
+   | charAt()                     | int 索引(0开始)                                          | 获取索引出字符                                               |
+   | getChars()、getBytes()       |                                                          | 复制部分字符/字节到指定数组                                  |
+   | equals()、equalsIgnoreCase() | 与之比较的Srting                                         | 比较字符是否相同，区分大小写和不区分大小写                   |
+   | compareTo()                  | 与之比较的Srting                                         | 返回-1，0，1。按照字典序比较                                 |
+   | contains()                   | 与之比较的 CharSequence 类型                             | 是否包含某字符串                                             |
+   | contentEquals()              | 与之比较的 CharSequence 类型或者 StringBuffer            | 如果参数内容与该String的内容完全一致。相比equals方法，这个关注的是内容，equals犯法还会进行类型比较 |
+   | regionMatcher()              |                                                          | 比较两个字符串的两个区域是否一样                             |
+   | startsWith()                 |                                                          | 是否以参数开头的字符串                                       |
+   | endsWith()                   |                                                          | 是否以参数结尾的字符串                                       |
+   | indexOf(),lastIndexOf()      |                                                          | 返回包含参数的索引位置，没有返回-1，lastIndexOf 倒找         |
+   | subString（）                |                                                          | 截取指定区域字符串                                           |
+   | concat（）                   |                                                          | 连接字符换，返回一个新的 String 对象                         |
+   | repalce（）                  |                                                          | 替换，如果没有替换那么返回原始String对象，否则返回替换后的新对象 |
+   | toLowCase(), toUpperCase()   |                                                          | 大小写转换。发生转换返回新对象，没有变化返回原始对象         |
+   | trim()                       |                                                          | 删除首位空，返回新对象，否则返回原始对象                     |
+   | valueOf()                    |                                                          | 对象到字符串转换函数                                         |
+   | intern（）                   |                                                          | 在运行时将 String 对象放入常量池                             |
+
+6. 格式化输出：
+
+   - System.out.format("%s %d ...", str, int); 和C用法一样，System.out.printf() 也可以，使用方法一样
+
+   - 使用 Formatter 类：
+
+     ```java
+     Formatter f = new Formatter(System.out);
+     f.format("%s %d %.2f","test",100,111.9);
+     ```
+
+     Formatter 构造器一般传入 PrintStream(), System.out 就是一个PirntStream，OutputStream 和 File
+
+   - 格式控制符
+
+     | 格式控制符 | 解释       |
+     |:----------: |: ----------: |
+     | d          | 十进制整形 |
+     |c|Unicode 字符|
+     |b|boolean值|
+     |s|String|
+     |f|浮点数|
+     |e|科学计数法|
+     |x|正数十六进制|
+     |h|散列码十六进制|
+
+     %b 对于 非boolean 对象，非null都是 true 包括 0 也是 true，使用了包装类型
+
+   - 使用 String.format() 函数，是一个静态函数按照 格式化列表 返回一个 String 对象
+
+7. 扫描输入：Scanner ，默认使用 空格 分割， 也可使用 正则表达式自定义
+
+# 第十四章 类型信息
+
+## 14.2 Class 对象
+
+1. 每个 .class 文件在加在到 JVM 中都对应一个 Class  对象。这个 Class 对象拥有这个类的所有完整信息，用于这个类对象的所有创建。
+
+2. 获取 Class 对象
+
+   ```java
+   //通过类名获取
+   Class<?> a1 = Class.forName("com.ouc.bible.A");
+   //通过已知对象获取
+   Class<? extends A> aClass = a.getClass();
+   //通过 类来获取类的信息
+   class aaClass = A.class;		//使用 .class 还不会抛出异常信息
+   //通过 Class 对象创建类
+   aClass.newInstance();
    
+   ```
+
+3. 使用 class.forName() 与 .class 加载类信息的区别：
+
+   - .class 生成的 Class 引用不进行获取类的初始化动作，尽可能的使用“惰性”，在必要时进行初始化。但是使用 class.forName() 会在调用完这个方法后就对获取类进行初始化以及父类构造等等
+   - 如果是一个  final staic 的编译器常量（写死在代码中的，没有使用 random 这种的），那么不进行初始化也可以读取，但是仅仅是 static 或 final 不可以，必须在使用前进行初始化。
+
+4. 使用反射创建对象，必须有默认构造函数。
+
+5. 数组是一个父类为 Object 的对象
+
+6. 假如  Circle 是 Shape 的派生类
+
+   ```java
+   //这个语句编译不过，因为 尽管 Circle 是 Shape 的派生类，但是 Class<Shape> 现在是 Class类型，那么 class<Circle> 与 Class<Shape> 没有继承关系，因此编译失败
+   Class<Shape> c = Circle.class;
+   
+   //正确写法就是下面，并且可以构建基类对象
+   Class<? extends Shape> c = Cricle.class; 
+   Shape aShape = a.newInstance(0);  //向上转型构建对象
+   
+   //还可以指向 向上 超类，但是不能构建 派生类超类对象，因为无法获知超类的类型
+   Class<? super Circle> c= c.getSuperClass();
+   Object o = c.newInstance();   //只能构建 Object 对象
+   ```
+
+7. 强制类型转换：
+
+   ```java
+   A b = new B();
+   
+   B bb = (B)b;
+   
+   B cc = B.class.cast(b);
+   
+   ```
+
+## 14.3 类型转换前先做检查
+
+
+
+
+
 
 
 

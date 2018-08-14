@@ -2,10 +2,7 @@ package com.ouc.bible;
 
 import com.ouc.bible.hoding.Stack;
 
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Test2
@@ -20,10 +17,7 @@ class A {
     public A(int id) {
         this.id = id;
     }
-
-    public A() {
-
-    }
+public A(){}
 
     public int getId() {
         return id;
@@ -36,12 +30,16 @@ class B extends A {
     public int getId() {
         return id;
     }
-
+public B(){}
     public B(int id) {
-        super();
-
+        super(id);
         this.id = id;
     }
+
+    public void ttt(){
+        System.out.println("BBB special!");
+    }
+
 }
 
 
@@ -58,41 +56,49 @@ public class Test2 {
             stack.push(i);
         }
         Iterator<Integer> it = stack.iterator();
-        while(it.hasNext()){
+        while (it.hasNext()) {
             System.out.println(it.next());
         }
         System.out.println("=====================");
 
-for (Integer integer : stack) {
-    System.out.println(integer);
-}
-
-System.out.println("=====================");
-
-for (Integer integer : stack.reversed()) {
-    System.out.println(integer);
-}
+        for (Integer integer : stack) {
+            System.out.println(integer);
+        }
 
         System.out.println("=====================");
-        while(!stack.isEmpty())
+
+        for (Integer integer : stack.reversed()) {
+            System.out.println(integer);
+        }
+
+        System.out.println("=====================");
+        while (!stack.isEmpty())
             System.out.println(stack.pop());
     }
 
 
-    public static void main(String[] args) {
-        int a[] = {1,2,3,4,5,6};
-//        List<Integer> list = new ArrayList<Integer>(Arrays.asList(a));
-//        System.out.println(list);
-//        Collections.shuffle(list,new Random(47));
-//        System.out.println(list);
+    public static void main(String[] args) throws IllegalAccessException, InstantiationException {
+      A b = new A();
 
-//        System.out.println(Arrays.asList(a).size());
-        System.out.println(Arrays.asList(new int[]{1,2,3,4}).size());
 
-        Set<Integer> set = new TreeSet<Integer>();
-        set.add(1);
-//        Collections.shuffle(Arrays.asList(a),new Random(10007));
+//      B bb = (B)b;
+//      bb.ttt();
+//
+//      B cc = B.class.cast(b);
 
-//        System.out.println(Arrays.toString(a));
+//        dd.ttt();
+
+
+//        A aa= aClass.newInstance();
+//
+//        System.out.println(aClass.getName());
+//        System.out.println(aClass.getCanonicalName());
+//        System.out.println(aClass.getSimpleName());
+
+//        System.out.println(a1.getSuperclass().getName());
+//        for (Method method : aClass.getMethods()) {
+//            System.out.println(method.getName());
+//        }
+
     }
 }
