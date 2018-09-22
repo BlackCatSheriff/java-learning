@@ -1,8 +1,7 @@
 package com.ouc.bible;
 
-import com.ouc.bible.hoding.Stack;
-
-import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Test2
@@ -49,56 +48,78 @@ class C extends A {
     }
 }
 
-public class Test2 {
-    public static void main1(String[] args) {
-        Stack<Integer> stack = new Stack<Integer>();
-        for (int i = 0; i < 10; i++) {
-            stack.push(i);
-        }
-        Iterator<Integer> it = stack.iterator();
-        while (it.hasNext()) {
-            System.out.println(it.next());
-        }
-        System.out.println("=====================");
 
-        for (Integer integer : stack) {
-            System.out.println(integer);
-        }
+class D extends C{
+    public D(int id) {
+        super(id);
+    }
+}
 
-        System.out.println("=====================");
+class E extends D{
+    public E(int id) {
+        super(id);
+    }
+}
 
-        for (Integer integer : stack.reversed()) {
-            System.out.println(integer);
-        }
+class TT{
+    public int a;
 
-        System.out.println("=====================");
-        while (!stack.isEmpty())
-            System.out.println(stack.pop());
+    @Override
+    public String toString() {
+        return "TT{" +
+                "a=" + a +
+                '}';
+    }
+}
+
+class FX<T>{
+    T var;
+
+    public FX(T var) {
+        this.var = var;
     }
 
 
+
+
+
+}
+
+
+public class Test2 {
+
+    public static void change(TT t){
+        t.a=100;
+        t=new TT();
+        t.a=66;
+
+    }
+
+    public static void f(Integer i){
+        i=8;
+    }
+
+    public  static void ff(String as){
+        as="heloo";
+    }
+
+
+
     public static void main(String[] args) throws IllegalAccessException, InstantiationException {
-      A b = new A();
+    List<? super C> ls=new LinkedList<A>();
+    List<? extends C> lss=new LinkedList<C>();
+
+    lss.add(new D(456));
 
 
-//      B bb = (B)b;
-//      bb.ttt();
-//
-//      B cc = B.class.cast(b);
 
-//        dd.ttt();
+        ls.add(new D(12));
+        ls.add(new C(1));
+        ls.add(new E(1));
+        ls.add(new B());
+        ls.add(new A(123));
 
 
-//        A aa= aClass.newInstance();
-//
-//        System.out.println(aClass.getName());
-//        System.out.println(aClass.getCanonicalName());
-//        System.out.println(aClass.getSimpleName());
-
-//        System.out.println(a1.getSuperclass().getName());
-//        for (Method method : aClass.getMethods()) {
-//            System.out.println(method.getName());
-//        }
 
     }
 }

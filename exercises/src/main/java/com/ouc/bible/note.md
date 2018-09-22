@@ -589,6 +589,7 @@
    COllections.shuffle();                      //打乱
    Collections.addAll();					//批量添加
    list.retainAll();						  //交集
+   Collections.emptyList();					//获取一个空list
    
    
    ```
@@ -932,7 +933,7 @@
    - .class 生成的 Class 引用不进行获取类的初始化动作，尽可能的使用“惰性”，在必要时进行初始化。但是使用 class.forName() 会在调用完这个方法后就对获取类进行初始化以及父类构造等等
    - 如果是一个  final staic 的编译器常量（写死在代码中的，没有使用 random 这种的），那么不进行初始化也可以读取，但是仅仅是 static 或 final 不可以，必须在使用前进行初始化。
 
-4. 使用反射创建对象，必须有默认构造函数。
+4. 使用 Class.newInstance()创建对象，必须有默认构造函数。
 
 5. 数组是一个父类为 Object 的对象
 
@@ -964,19 +965,337 @@
 
 ## 14.3 类型转换前先做检查
 
+1.  动态的 instanceof： Class.isInstachce  
 
+2. 检查类型是否是属于类族：`baseType.class.isAssignableFrom(aTpe.class)`
 
+   注：这个 baseType 作为类图中最顶端的框，所以 Object 作为参数传递进来会返回 false（除baseType是Object）
 
+3. 结合 动态  instanceof 和 isAssignable 可以递归统计类族确定对象的个数
 
+4. 类型是否相等比较：instanceof  Class.isInstance(obj)       
 
+   ​					obj.getClass() == Class.classs  obj.get.getClass().equals(Class.class)
 
+   > 注：
+   >
+   > -  instanceof  Class.isInstance(obj)  这两种方式的结果相同
+   >
+   > - obj.getClass() == Class.classs  obj.get.getClass().equals(Class.class) 这两种方式的结果相同
+   >
+   > - 区别: 上面一组表明**你是这个类族的么?**（考虑继承）  
+   >
+   >   ​          下面一组表明**你和我严格相等么？**（不考虑继承）
 
+   
 
+## 14.4 反射
 
+1. 使用 Class 中的方法创建对象 getConstructor(Class...).newInstance()、 getDeclaredConstructor(Class...).newInstance()
 
+   > 区别：
+   >
+   > - getConstructor 只能获取 public 修饰的构造器
+   > - getDeclaredConstructor  可以获取所有声明的构造器(private,  protected, public)
 
+   注: `两个方法的参数列表都是可变参数列表`
 
+## 14.7 动态代理
 
+1. 使用 JDK 提供的动态代理方法，是实现 InvocationHandler 接口。可以实现代理远程加载类
+
+   ```java
+   interface Interface{
+       void doSomething();
+       void somethingElse(String arg);
+   }
+   
+   class RealObject implements Interface{
+   
+       public void doSomething() {
+           System.out.println("doSomething");
+       }
+   
+       public void somethingElse(String arg) {
+           System.out.println("somethingElse: "+arg);
+       }
+   }
+   
+   class DynamicProxyHandler implements InvocationHandler{
+       private Object proxied;
+   
+       public DynamicProxyHandler(Object proxied) {
+           this.proxied = proxied;
+       }
+   
+       public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+   
+           //可以进行方法过滤
+           if(method.getName().equals("somethingElse"))
+               return null;
+   //            System.out.println("catch the method of somethingElse!");
+           return  method.invoke(proxied,args);
+       }
+   }
+   
+   public class SimpleDynamicProxy {
+       public static void main(String[] args) {
+           Interface proxy = (Interface) Proxy.newProxyInstance(Interface.class.getClassLoader(),new Class[] {Interface.class},new DynamicProxyHandler(new RealObject()));
+           proxy.doSomething();
+           proxy.somethingElse("999999");
+       }
+   }
+   //output
+   doSomething
+   //下面这俩个输出被 代理过滤掉了
+   //catch the method of somethingElse!
+   //somethingElse: 999999
+   ```
+
+   ## 14.8 空对象
+
+   1. 空对象是一个类的特殊对象，相比 NULL 来讲，在使用的时候不需要检测是否是null 直接调用不会抛出异常。
+
+   2. 针对单一对象的空对象示例;
+
+      ```java
+      class Person{
+          private String name;
+          private int age;
+      
+          public Person(String name, int age) {
+              this.name = name;
+              this.age = age;
+          }
+      
+          private static class NullPerson extends Person{
+              public NullPerson() {
+                  super("null",0);
+              }
+          }
+          //空对象使用 单例，因为所有对象的类所对应的空对象都是一样的
+          public static final NullPerson NULL = new NullPerson();
+      }
+      
+      public class NUllObject {
+      
+          public static void main(String[] args) {
+              Person p = Person.NULL;
+              if(p==Person.NULL)
+                  System.out.println("yeah!");
+      
+          }
+      }
+      //output
+      yeah!
+      ```
+
+   3. 为实现某接口的所有对象创建空对象
+
+      使用动态代理的方式，并且 定义一个 NUll接口 作为标记
+
+      ```java
+      //所有类要实现的接口
+      interface Robot{
+          String name();
+      }
+      
+      //作为标记接口
+      interface Null{}
+      
+      class NullRobotProxyHandler implements InvocationHandler{
+      
+          private String nullName;
+          private Robot proxied = new NullRobot();
+          private class NullRobot implements Robot, Null{
+              public String name() {
+                  return nullName;
+              }
+          }
+      
+          public NullRobotProxyHandler(Class<? extends Robot> type) {
+              nullName = type.getSimpleName()+" NullRobot!";
+          }
+      
+          public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+              return method.invoke(proxied,args);
+          }
+      }
+      
+      
+      class NullRobot {
+          public static Robot createNullRobot(Class<? extends Robot> type){
+              return (Robot)Proxy.newProxyInstance(NullRobot.class.getClassLoader(),new Class[] {Robot.class}, new NullRobotProxyHandler(type));
+          }
+      }
+      
+      //一个 robot 实现
+      class HelloRobot implements Robot{
+          private String name;
+      
+          public HelloRobot(String name) {
+              this.name = name;
+          }
+      
+          public String name() {
+              return name;
+          }
+      }
+      
+      //另一个 robot 实现
+      class ByeRobot implements Robot{
+          private String name;
+      
+          public ByeRobot(String name) {
+              this.name = name;
+          }
+      
+          public String name() {
+              return name;
+          }
+      }
+      
+      public class DynamicProxyNullObject {
+      
+          public static void main(String[] args) {
+              Robot[] robots = {
+                      new HelloRobot("User hello bb"),
+                      NullRobot.createNullRobot(ByeRobot.class),
+              };
+      
+              for (Robot robot : robots) {
+                  System.out.println(robot.name());
+              }
+          }
+      
+      }
+      //output
+      User hello bb
+      ByeRobot NullRobot!
+      ```
+
+# 第十五章 泛型
+
+1. 泛型方法 ： \<T\> 放在返回类型之前
+
+2. 基本类型的泛型在使用过程中被自动包装。例如在方法调用参数传递的时候。
+
+3. 类型推断只在赋值操作有效
+
+   ```java
+   <K, V> Map<K, V> map() {
+       return new HashMap<K, V>();
+   }
+   Map<K, V> mmap = map(); //此时调用函数 map() 后发生了类型推断
+   ```
+
+   使用上面例子中的 map 函数的返回值作为另一个函数的参数时候不可以，编译器不会进行类型推断。需要在方法名前面使用 <> 声明准确类型
+
+4. 泛型的擦除问题。  LIst\<String\>  和   List\<Integer> 的 className 都是  List。因此尖括号中如果是类族继承关系，但是使用 List 之后是没有多态性质的。就是因为擦除的问题。擦除后认为是 Class 对象，不具备任何具体信息。
+
+5. 显示工厂就是这个工厂类有 create 方法专门根据特定构造函数  new 对象，隐式的工厂就是使用 class.newInstance () 方法产生对象
+
+6. 创建泛型数组：在给数组分配空间 的时候用 object 先填充，因为没有 new T() 这种用法,或者使用 class的new instance方法来搞定。在获取对象的时候强转一下就OK
+
+   一种方法
+
+   ```java
+   package com.ouc.bible.generics;
+   
+   /**
+    * GenericArray
+    *
+    * @author skyUnv
+    * created on 2018/9/22 14:41
+    */
+   
+   class Gen<T>{}
+   
+   public class GenericArray<T> {
+       private Object[] gia; //注意这里底层数据类型是 Object
+       private int cnt=0;
+       public GenericArray(int sz) {
+           this.gia = new Object[sz];
+       }
+   
+       public void put(T obj){
+           gia[cnt++]=obj;
+       }
+   
+       public T get(int idx){
+           return (T)gia[idx];
+       }
+   
+       public static void main(String[] args) {
+           int size=10;
+           GenericArray<Integer> gai=new GenericArray<Integer>(size);
+   
+           for (int i = 0; i < size; i++) {
+               gai.put(i+1);
+           }
+   
+           System.out.println(gai.get(0));
+           System.out.println(gai.get(0).getClass().getSimpleName());
+           
+       }
+   
+   }
+   
+   ```
+
+   另一种方法:
+
+   ```java
+   
+   public class GenericArray<T> {
+       private T[] gia;        //注意这里底层数据类型是 T
+       private int cnt=0;
+   
+       @SuppressWarnings("unchecked")
+       public GenericArray(Class<T> type, int sz){
+           gia= (T[])Array.newInstance(type,sz);
+       }
+   
+       public void put(T o){
+           gia[cnt++]=o;
+       }
+   
+       public T get(int idx){
+           return gia[idx];
+       }
+   
+           public static void main(String[] args) {
+           int size=10;
+           GenericArray<String> gai=new GenericArray<String>(String.class,size);
+   
+           for (int i = 0; i < size; i++) {
+               gai.put( Integer.toString(i+1));
+           }
+   
+           System.out.println(gai.get(0));
+           System.out.println(gai.get(0).getClass().getSimpleName());
+   
+       }
+   
+   }
+   ```
+
+7. 边界：由于泛型擦除了 类型信息，我们想要调用方法只能使用 Object 已有的，不能满足我们的需求因此，我们要给泛型添加边界，让其具有更强的方法调用能力。具体 `Class< T extends baseClass>`
+
+   ```java
+   public static void writ(List<? super Apple> apples){
+       apples.add(new Apple());
+       apples.add(new Jonathan());// Jonathan是 apple 的子类
+   }
+   // apples 可以是 Apple 基类(包括 Apple)的List 类型
+   // 但是 apples.add 只能添加 Apple 的子类型，这样才符合类型的静态检测。不能添加 Apple的父类型，否则 这个 apples 就向上敞开一个口子，随便加入类型了。
+   ```
+
+   List<? extends Class> list, 向这个样的 list 中添加 任何都是不行的，只有null是合法的，但是并无意义。因此需要用 super 来解决这个问题。
+
+   super 这种可以实现将 Apple 对象放入 LIst\<Fruit\> 中。
+
+   
 
 
 
@@ -1162,5 +1481,18 @@
 2. Java中除了 static 和 final（private 也是final） 方法是前期绑定，其他都是动态绑定
 3. final 方法相比没有final的可以提高一点性能，final方法由动态绑定变为静态绑定
 4. 异常不能作为重载条件也就是不能作为判别不同方法的依据，不用方法主要是依据方法名和方法的参数决定
-5. 
+5. 可以使用 final 保护 public 对象不被修改，是只读属性。（原因：使用构造函数赋值 final 后就不能改了！） 
+6. 动态 instanceof 和 静态的关键字 instanceof`动态instanceof  class.instanceof(obj)` 
+7. 
+
+
+
+
+
+
+
+# 小技能
+
+1. 创建泛型数组使用 (T [])Array.newInstance(clazz, count);  `前面的 T[] 是因为泛型的擦除原因`
+2. 
 
