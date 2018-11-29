@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.ouc.it.mapper.UserMapper">
+    <!--
+    keyColumn: 主键的列
+    keyProperty: 主键对应的属性
+    useGenerateKeys: 是否使用数据库 自增 ID
+    parameterType: 参数类型
+    -->
+    <insert id="add" keyColumn="id" keyProperty="id" useGeneratedKeys="true" parameterType="edu.ouc.it.domain.User">
+        insert into user(name, email, age, bornDate) values (#{name}, #{email}, #{age}, #{bornDate})
+    </insert>
+
+
+
+</mapper>

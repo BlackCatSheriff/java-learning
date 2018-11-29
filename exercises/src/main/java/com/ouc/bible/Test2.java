@@ -86,6 +86,14 @@ class FX<T>{
 }
 
 
+
+interface Payable<T>{
+    void f();
+}
+
+
+
+
 public class Test2 {
 
     public static void change(TT t){
@@ -104,20 +112,44 @@ public class Test2 {
     }
 
 
+    public static void woca(List<?> list){
+        for (Object o : list) {
+            System.out.println(o);
+        }
+    }
+
 
     public static void main(String[] args) throws IllegalAccessException, InstantiationException {
-    List<? super C> ls=new LinkedList<A>();
-    List<? extends C> lss=new LinkedList<C>();
+//    List<? super C> ls=new LinkedList<A>();
+//    List<? extends C> lss=new LinkedList<C>();
+//
+//    lss.add(new D(456));
+//
+//
+//
+//        ls.add(new D(12));
+//        ls.add(new C(1));
+//        ls.add(new E(1));
 
-    lss.add(new D(456));
+        List ll=new LinkedList();
+        ll.add(1);
+        ll.add("1");
 
 
 
-        ls.add(new D(12));
-        ls.add(new C(1));
-        ls.add(new E(1));
-        ls.add(new B());
-        ls.add(new A(123));
+        List<Integer>  lw=new LinkedList<Integer>();
+
+        lw.add(1);
+        lw.add(2);
+        lw.add(3);
+
+        woca(lw);
+        woca(ll);
+
+
+
+
+
 
 
 

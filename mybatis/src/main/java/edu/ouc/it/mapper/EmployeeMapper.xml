@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="edu.ouc.it.mapper.EmployeeMapper">
+
+    <resultMap id="employee_mapping" type="edu.ouc.it.domain.Employee">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+        <association property="dept" column="dept_id" javaType="edu.ouc.it.domain.Department"  select="edu.ouc.it.mapper.DepartmentMapper.get" />
+    </resultMap>
+
+    <resultMap id="employee_list_mapping" type="edu.ouc.it.domain.Employee">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+       <association property="dept" javaType="edu.ouc.it.domain.Department">
+           <id column="did" property="id"/>
+           <result column="dname" property="name"/>
+       </association>
+    </resultMap>
+
+
+    <insert id="add" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        insert into emploee (name, dept_id) values (#{name},#{dept.id});
+    </insert>
+
+
+    <select id="get" resultMap="employee_mapping">
+        select * from emploee where id=#{idddd};
+    </select>
+
+    <select id="list" resultMap="employee_list_mapping">
+        select e.id, e.name, e.dept_id, d.id as did, d.name as dname
+         from emploee e left join dept d on e.dept_id = d.id;
+    </select>
+
+    <select id="list_rude" resultMap="employee_mapping">
+        select * from emploee;
+    </select>
+
+</mapper>

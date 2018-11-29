@@ -1295,9 +1295,36 @@
 
    super 这种可以实现将 Apple 对象放入 LIst\<Fruit\> 中。
 
-   
+8. List LIst\<?\>  是不一样的，带 ？ 的是表明不知道以后要存放什么类型但是一定是统一类型，不带 ? 就是随便放，类型混合。
 
+9. Java 泛型的各类问题总结：P400
 
+   1. 读取对象转型
+
+      ```java
+      ObjectInputStream in=new ObjectInputStream(new FileInputStream("sss"));
+      List<Integer> ls = List.class.cast(in.readObject());
+      List<Integer> ls1 = (List<Integer>)(in.readObject());
+      ```
+
+   2.  自限定类型没看，看不懂
+
+   3. 使用 受检查容器可以检查 SE5之前没有使用泛型容器的函数。
+
+      ```java
+      List<Cat> ls = Collections.checkedList(new ArrayList<cat>(), Cat.class)；
+      当插入不是 Cat 对象的时候抛出异常， 例如使用 todo 函数就会出异常
+      一般我们用的是这来定义的：
+      List<Cat> ls = new ArrayList<Cat>();//这个是不会爆出异常的，当使用 todo 函数的时候
+      void todo(List l){
+      	l.add(new Dog);
+      }
+      
+      ```
+
+      
+
+    
 
 
 

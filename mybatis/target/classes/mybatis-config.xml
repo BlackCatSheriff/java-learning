@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<!-- mybatis 配置-->
+<configuration>
+
+
+
+    <!-- 配置 mybatis 的执行状态 -->
+    <settings>
+         <!--配置懒加载，关联对象 -->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!--<setting name="aggressiveLazyLoading" value="false"></setting>-->
+        <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode"/>
+    </settings>
+
+
+<environments default="default">
+    <!-- 一个 enviroment 就是一个数据库环境-->
+    <environment id="default">
+        <!-- 配置事务管理器 -->
+        <transactionManager type="JDBC"/>
+        <!-- 数据库连接池 -->
+        <dataSource type="POOLED">
+            <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+            <!-- 时间不一致，使用 问号传值搞定 -->
+            <property name="url" value="jdbc:mysql:///mybatis?serverTimezone=UTC"/>
+            <property name="username" value="root"/>
+            <property name="password" value="a1377590675"/>
+        </dataSource>
+    </environment>
+</environments>
+
+    <mappers>
+        <!--<mapper resource="edu/ouc/it/mapper/UserMapper.xml"/>-->
+        <!--<mapper resource="edu/ouc/it/mapper/TestUserMapper.xml"/>-->
+        <mapper resource="edu/ouc/it/mapper/DepartmentMapper.xml"/>
+        <mapper resource="edu/ouc/it/mapper/EmployeeMapper.xml"/>
+        <mapper resource="edu/ouc/it/mapper/DepartmentWithEmpMapper.xml"/>
+        <mapper resource="edu/ouc/it/mapper/EmployeeWithoutDeptMapper.xml"/>
+
+    </mappers>
+
+
+</configuration>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="edu.ouc.it.mapper.TestUserMapper">
+    <insert id="add" keyColumn="id" keyProperty="id" useGeneratedKeys="true" parameterType="edu.ouc.it.domain.TestUser">
+        insert into test_user (name, age) values (#{name},#{age})
+    </insert>
+
+    <delete id="delete_by_id" parameterType="long">
+        delete from test_user
+        where id = #{iddd}
+    </delete>
+
+    <select id="get_by_id" parameterType="long" resultType="edu.ouc.it.domain.TestUser">
+        select * from test_user where id=#{idddd};
+    </select>
+
+    <update id="update" parameterType="edu.ouc.it.domain.TestUser" >
+        update test_user set name =#{name},age=#{age} where id=#{id}
+    </update>
+
+    <select id="table_list" resultType="edu.ouc.it.domain.TestUser">
+        select * from test_user;
+
+    </select>
+
+</mapper>
